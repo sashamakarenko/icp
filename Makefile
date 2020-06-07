@@ -8,7 +8,7 @@ PE_LIB_PATH := $(PE_ROOT)/build/lib/release/libpe-1.0.so
 
 TEST_INCLUDES = -I$(PE_ROOT)/src
 TEST_EXTRA_DEPENDENCY := $(PE_LIB_PATH)
-TEST_EXTRA_LINK_LIBS = -L$(dir $(PE_LIB_PATH)) -l$(patsubst lib%.so,%,$(notdir $(PE_LIB_PATH)))
+TEST_EXTRA_LINK_LIBS = -L$(dir $(PE_LIB_PATH)) -l$(patsubst lib%.so,%,$(notdir $(PE_LIB_PATH))) -lpthread
 TEST_EXTRA_LD_PATH :=$(dir $(PE_LIB_PATH))
 
 include mfile/Makefile

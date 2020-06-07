@@ -11,7 +11,7 @@ namespace icp
 
 namespace
 {
-    constexpr static ptr_type MAX_POOLS_BITS = 5;
+    constexpr static ptr_type MAX_POOLS_BITS = 10;
     constexpr static ptr_type MAX_POOLS      = 1 << MAX_POOLS_BITS;
 
     constexpr static ptr_type DATA_SIZE_BITS = sizeof( ptr_type ) * 8 - MAX_POOLS_BITS;
@@ -71,6 +71,13 @@ inline constexpr IString::len_type decodeLength( const char * ptr )
     return ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
 }
 
+void printCorruptedBuffer( unsigned pool, ptr_type idx, const char * ptr )
+{
+    const char * zero = ptr - 1;
+    while( *zero ) --zero;
+    std::cerr << "corrupted data pool: " << pool << " idx: " << idx << " len: " << (ptr-zero) << " bytes: " << (int)ptr[-1] << ' ' << (int)ptr[0] << ' ' << (int)ptr[1] << ' ' << (int)ptr[2] << ' ' << (int)ptr[3] << std::endl;
+}
+
 }
 
 /*
@@ -97,8 +104,12 @@ IString IString::searchExisting( const char * str, len_type len )
             len_type l = decodeLength( ptr );
             if( l == 0 )
             {
-                // todo
-                std::cerr << "corrupted data 1" << std::endl;
+                // last in pool
+                if( idx + std::numeric_limits<len_type>::max() < DATA_SIZE )
+                {
+                    printCorruptedBuffer( ph, idx, ptr );
+                    break;
+                }
                 break;
             }
             if( ptr[ l + 2 ] != 0 ) // long string > 255
@@ -108,14 +119,18 @@ IString IString::searchExisting( const char * str, len_type len )
                 l = decodeLength( ptr );
                 if( l == 0 )
                 {
-                    // todo
-                    std::cerr << "corrupted data 2" << std::endl;
+                    // last in pool
+                    if( idx + std::numeric_limits<len_type>::max() < DATA_SIZE )
+                    {
+                        printCorruptedBuffer( ph, idx, ptr );
+                        break;
+                    }
                     break;
                 }
-                if( ptr[ l + 2 ] != 0 )
+                if( idx + l + 2 > DATA_SIZE || ptr[ l + 2 ] != 0 )
                 {
                     // todo
-                    std::cerr << "corrupted data 3" << std::endl;
+                    printCorruptedBuffer( ph, idx, ptr );
                     break;
                 }
             }
@@ -163,7 +178,7 @@ bool IString::assign( const char * str, IString::len_type len, bool reuse )
         }
     }
 
-    unsigned lenSize = len < 255U ? 1 : 2;
+    unsigned lenSize = len < 256U ? 1 : 2;
     unsigned sz      = len + lenSize + 1;
     unsigned ph      = poolHead.load();
     unsigned idx;
@@ -198,14 +213,14 @@ bool IString::assign( const char * str, IString::len_type len, bool reuse )
 
     auto & pool = pools[ ph ];
     
-    if( len < 255U )
+    if( len < 256U )
     {
         --idx;
     }
     
     memcpy( & pool.data[ idx + 2 ], str, len );
     
-    if( len < 255U )
+    if( len < 256U )
     {
         pool.data[ idx + 1 ] = (uint8_t)len;
         if( pool.data[ idx ] != 0 )
