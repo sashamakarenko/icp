@@ -66,6 +66,11 @@ unsigned initPool0()
     return 0;
 }
 
+inline constexpr IString::len_type decodeLength( const char * ptr )
+{
+    return ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+}
+
 }
 
 /*
@@ -89,7 +94,7 @@ IString IString::searchExisting( const char * str, len_type len )
         for( ptr_type idx = 1; idx < endOfData; )
         {
             const char * ptr = & pool.data[ idx ];
-            len_type l = ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+            len_type l = decodeLength( ptr );
             if( l == 0 )
             {
                 // todo
@@ -100,7 +105,7 @@ IString IString::searchExisting( const char * str, len_type len )
             {
                 ++ptr;
                 ++idx;
-                l = ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+                l = decodeLength( ptr );
                 if( l == 0 )
                 {
                     // todo
@@ -240,7 +245,7 @@ IString::len_type IString::size() const noexcept
     }
     
     const char * ptr = & pools[ _idx >> DATA_SIZE_BITS ].data[ _idx & DATA_MASK ];
-    return ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+    return decodeLength( ptr );
 }
 
 bool IString::operator == ( const IString & other ) const
