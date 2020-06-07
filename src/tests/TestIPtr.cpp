@@ -8,6 +8,7 @@ int main( int, char** )
     std::cout << "s.i=" << s.get().i << std::endl;
     s = 3;
     std::cout << "s.i=" << s.get().i << std::endl;
-    s = 4;
-    std::cout << "s.i=" << s.get().i << std::endl;
+    SPtr ss{10};
+    std::cout << "ss.i=" << ss.get().i << std::endl;
+    std::cout << "ss-s=" << ( &ss.get() - &s.get() ) << std::endl;
 }

@@ -23,6 +23,7 @@ class IPtrPool
     private:
         
         constexpr static ptr_type MAX_POOLS_BITS = 5;
+
         constexpr static ptr_type MAX_POOLS      = 1 << MAX_POOLS_BITS;
 
         constexpr static ptr_type DATA_SIZE_BITS = sizeof( ptr_type ) * 8 - MAX_POOLS_BITS;
@@ -35,7 +36,7 @@ class IPtrPool
     
         static T * getPtr( ptr_type idx )
         {
-            return reinterpret_cast< T * >( & pools[ idx >> DATA_SIZE_BITS ].data[ idx & DATA_MASK ] );
+            return reinterpret_cast< T * >( & pools[ idx >> DATA_SIZE_BITS ].data[ ( idx & DATA_MASK ) * TSize ] );
         }
 
         static T * allocate( ptr_type & idx );
@@ -61,8 +62,8 @@ std::atomic<unsigned> IPtrPool<T>::poolHead( initPool0() );
 template< typename T >
 void IPtrPool<T>::init( ptr_type size )
 {
-    data.assign( size, 0 );
-    head.store( TSize );
+    data.assign( size * TSize, 0 );
+    head.store( 1 );
     std::cout << "IPtrPool.size = " << data.size() << std::endl;
 }
 
@@ -104,9 +105,9 @@ T * IPtrPool<T>::allocate( ptr_type& idx )
     {
     }
     
-    idx = pools[ ph ].head.fetch_add( TSize );
+    idx = pools[ ph ].head.fetch_add( 1 );
     
-    while( idx + TSize > DATA_SIZE )
+    while( idx + 1 > DATA_SIZE )
     {
         if( poolHead.compare_exchange_strong( ph, ph + 1 ) )
         {
@@ -125,12 +126,12 @@ T * IPtrPool<T>::allocate( ptr_type& idx )
         {
             throw std::logic_error( "IPtrPool<T>: no more pools available" );
         }
-        idx = pools[ ph ].head.fetch_add( TSize );
+        idx = pools[ ph ].head.fetch_add( 1 );
     }
 
     auto & pool = pools[ ph ];
     
-    T * ptr = reinterpret_cast< T* >( & pool.data[ idx ] );
+    T * ptr = reinterpret_cast< T* >( & pool.data[ idx * TSize ] );
     idx += ( ph << DATA_SIZE_BITS );
     
     return ptr;

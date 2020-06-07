@@ -10,12 +10,13 @@ namespace icp
 {
 
 typedef uint32_t ptr_type;
-    
+
+// Immutable Pointer
 template< typename T >
 class IPtr
 {
     public:
-        
+
         IPtr(): _idx{0} {}
         
         template< typename A, typename... Types >
@@ -29,14 +30,26 @@ class IPtr
         {
             return * new( _idx ? getPtr() : allocate( _idx ) ) T( args... );
         }
-    
-        ~IPtr() { _idx = 0; }
+
+        ~IPtr()
+        {
+            _idx = 0;
+        }
+
+        void destroyObject() const
+        {
+            T * obj = getPtr();
+            if( obj )
+            {
+                obj->~T();
+            }
+        }
     
         T & get() const { return * getPtr(); }
         
         operator const T & () const;
         
-        const IPtr & operator = ( const T & t ){ make(t); return *this; } 
+        const IPtr & operator = ( const T & t ){ make(t); return *this; }
          
     private:
         

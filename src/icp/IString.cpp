@@ -68,7 +68,59 @@ unsigned initPool0()
 
 }
 
-bool IString::assign( const char * str, IString::len_type len )
+/*
+pool data layout
+
+  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
+|___|___|___|___|___|___|___|___|___|___|___|___|___|___|...
+  0   0   3   A   B   C   0   1   2   V   E   R   Y  ... 
+  |   |                       |
+  |   string ABC idx          130 byte long string idx
+  reserved for 0 length strings
+*/
+
+IString IString::searchExisting( const char * str, len_type len )
+{
+    IString ret;
+    for( unsigned ph = 0; ph <= poolHead.load(); ++ph )
+    {
+        auto & pool = pools[ ph ];
+        ptr_type endOfData = pool.head.load();
+        for( ptr_type idx = 1; idx < endOfData; )
+        {
+            const char * ptr = & pool.data[ idx ];
+            len_type l = ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+            if( l == 0 )
+            {
+                // corrupted data
+                std::cerr << "corrupted data " << std::endl;
+                break;
+            }
+            if( ptr[ l + 2 ] != 0 ) // long string > 255
+            {
+                ++ptr;
+                ++idx;
+                l = ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+                if( ptr[ l + 2 ] != 0 )
+                {
+                    // corrupted data
+                    std::cerr << "corrupted data " << std::endl;
+                    break;
+                }
+            }
+            if( l == len && std::strncmp( ptr + 2, str, l ) == 0 )
+            {
+                ret._idx = ( ph << DATA_SIZE_BITS ) + idx;
+                return ret;
+            }
+            idx += l + 2;
+        }
+    }
+    return ret;
+}
+
+
+bool IString::assign( const char * str, IString::len_type len, bool reuse )
 {
     if( _idx != 0 )
     {
@@ -90,6 +142,16 @@ bool IString::assign( const char * str, IString::len_type len )
         len = (len_type)sz;
     }
     
+    if( reuse )
+    {
+        IString existing = searchExisting( str, len );
+        if( existing._idx )
+        {
+            _idx = existing._idx;
+            return true;
+        }
+    }
+
     unsigned lenSize = len < 255U ? 1 : 2;
     unsigned sz      = len + lenSize + 1;
     unsigned ph      = poolHead.load();
@@ -154,17 +216,17 @@ bool IString::assign( const char * str, IString::len_type len )
     return true;
 }
 
-IString::IString( const char * str, IString::len_type len ) : _idx{0}
+IString::IString( const char * str, IString::len_type len, bool reuse ) : _idx{0}
 {
-    assign( str, len );
+    assign( str, len, reuse );
 }
 
-const char * IString::c_str() const
+char * IString::ptr() const noexcept
 {
     return _idx ? & pools[ _idx >> DATA_SIZE_BITS ].data[ ( _idx & DATA_MASK ) + 2 ] : nullptr;
 }
 
-IString::len_type IString::size() const
+IString::len_type IString::size() const noexcept
 {
     if( _idx == 0 )
     {

@@ -1,46 +1,25 @@
 #include <iostream>
 #include <icp/IString.h>
-#include <pe/Measurement.h>
+
+extern const char * longString, *pi1000;
 
 int main( int, char** )
 {
-    icp::IString a;
-    icp::IString b( "b" );
-    std::cout << b << std::endl;
-
-    pe::Measurement m;
-    m.pinToCpuCore( 3 );
-    m.addEvent( pe::EventType::cpuCycles );
-    m.addEvent( pe::EventType::hwInstructions );
-    m.addEvent( pe::EventType::branchInstructions );
-    m.addEvent( pe::EventType::llCacheReadMisses );
-    m.addEvent( pe::EventType::branchMisses );
-    m.addEvent( pe::EventType::busCycles );
-    m.addEvent( pe::EventType::l1dCacheReadMisses );
-    m.addEvent( pe::EventType::l1iCacheReadMisses );
-    m.addEvent( pe::EventType::memory );
-    m.initialize( 30 );
+    std::cout << "sizeof std::string " << sizeof( std::string )  << std::endl;
+    std::cout << "sizeof std::string_view " << sizeof( std::string_view )  << std::endl;
+    std::cout << "sizeof icp::IString " << sizeof( icp::IString )  << std::endl;
     
-    for( int j = 0; j < m.getMaxCaptures(); ++j )
-    {
-        m.startCapture();
-        icp::IString c( "012345678901234567890123456789012345678901234567890123456789" );
-        m.stopCapture();
-    }
-    m.prepareResults();
-    m.printCaptures();
-    m.showAverageValues( std::cout );
-    m.rewind();
-
-    for( int j = 0; j < m.getMaxCaptures(); ++j )
-    {
-        m.startCapture();
-        std::string c( "012345678901234567890123456789012345678901234567890123456789" );
-        m.stopCapture();
-    }
-    m.prepareResults();
-    m.printCaptures();
-    m.showAverageValues( std::cout );
-    m.rewind();
-
+    icp::IString a;
+    icp::IString pi1( pi1000 );
+    icp::IString b1( "blabla" );
+    icp::IString piMiddle( pi1000 );
+    icp::IString b2( "blabla" );
+    icp::IString b3( "blabla", true );
+    icp::IString pi2( pi1000 );
+    icp::IString anything( "dadadadada" );
+    icp::IString pi3( pi1000, true );
+    std::cout << "b2-b1=" << ( b2.data() - b1.data() ) << std::endl;
+    std::cout << "b3-b1=" << ( b3.data() - b1.data() ) << std::endl;
+    std::cout << "pi2-pi1=" << ( pi2.data() - pi1.data() ) << std::endl;
+    std::cout << "pi3-pi1=" << ( pi3.data() - pi1.data() ) << std::endl;
 }
