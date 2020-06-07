@@ -92,8 +92,8 @@ IString IString::searchExisting( const char * str, len_type len )
             len_type l = ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
             if( l == 0 )
             {
-                // corrupted data
-                std::cerr << "corrupted data " << std::endl;
+                // todo
+                std::cerr << "corrupted data 1" << std::endl;
                 break;
             }
             if( ptr[ l + 2 ] != 0 ) // long string > 255
@@ -101,10 +101,16 @@ IString IString::searchExisting( const char * str, len_type len )
                 ++ptr;
                 ++idx;
                 l = ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
+                if( l == 0 )
+                {
+                    // todo
+                    std::cerr << "corrupted data 2" << std::endl;
+                    break;
+                }
                 if( ptr[ l + 2 ] != 0 )
                 {
-                    // corrupted data
-                    std::cerr << "corrupted data " << std::endl;
+                    // todo
+                    std::cerr << "corrupted data 3" << std::endl;
                     break;
                 }
             }
