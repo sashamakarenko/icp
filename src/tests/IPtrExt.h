@@ -2,7 +2,9 @@
 #define IPTREXT_H
 
 #include <icp/IPtr.h>
+#include <icp/IString.h>
 #include <iostream>
+#include <vector>
 struct S
 {
     S( int i ): i{i} { std::clog << "S::S( "<< i << " )\n"; }
@@ -13,6 +15,4 @@ struct S
 
 typedef icp::IPtr<S> SPtr;
 
-
 #endif /* IPTREXT_H */
-

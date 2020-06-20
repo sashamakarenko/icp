@@ -92,6 +92,13 @@ typedef std::shared_ptr<Order> OrderPtr;
 
 struct Customer
 {
+    Customer( const std::string & dn, const std::string & fn, const std::string & sn, const std::string & em ):
+        displayName{dn},
+        firstName{fn},
+        secondName{sn},
+        email{em}
+    {
+    }
     std::string           displayName;
     std::string           firstName;
     std::string           secondName;
@@ -103,6 +110,13 @@ typedef std::shared_ptr<Customer> CustomerPtr;
 
 struct Product
 {
+    Product( const std::string & id, const std::string & nm, const std::string & ds, double px ):
+        id{id},
+        name{nm},
+        description{ds},
+        price{px}
+    {
+    }
     std::string          id;
     std::string          name;
     std::string          description;
@@ -114,6 +128,7 @@ typedef std::shared_ptr<Product> ProductPtr;
 
 struct Item
 {
+    Item( ProductPtr p, uint16_t qty = 1 ): product{p}, quantity{qty} {}
     ProductPtr           product;
     uint16_t             quantity;
 };

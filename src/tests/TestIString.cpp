@@ -1,11 +1,21 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <set>
 #include <random>
 #include <cstring>
+#include <iomanip>
 #include <icp/IString.h>
 
 extern const char * longString, *pi1000, *pi999;
+
+#define CHECK( TITLE, EXPR, CONDITION ) {\
+    auto res = EXPR;\
+    const char * bg = ( res CONDITION ) ? "\e[32;1m" : "\e[31;1m";\
+    std::cout << #TITLE << " : " << bg << std::boolalpha << res << "\e[0m" << std::endl;\
+}
+
+bool dbg = icp::IString::setDebug( true );
 
 int main( int, char** )
 {
@@ -13,7 +23,13 @@ int main( int, char** )
     std::cout << "sizeof std::string_view " << sizeof( std::string_view )  << std::endl;
     std::cout << "sizeof icp::IString " << sizeof( icp::IString )  << std::endl;
     
-    icp::IString a;
+    // icp::IString::setReuseAllStrings( true );
+
+    icp::IString e1, e2;
+    e1 = "";
+    e2 = "";
+    CHECK( e2-e1, e2.data() - e1.data(), == 0 )
+
     icp::IString pi1( pi1000 );
     icp::IString b1( "blabla" );
     icp::IString pi11( pi1000 );
@@ -28,17 +44,10 @@ int main( int, char** )
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> distrib( 1, piLen - 2 );
-            unsigned n = 100000/nbThreads;
+            unsigned n = 1000000/nbThreads;
             for( int j = 0; j < n; ++j )
             {
-                const char * ptr = pi1.data() + distrib(gen);
-                icp::IString str( ptr );
-                auto sptr = str.data();
-                auto slen = str.size();
-                if( std::strlen( sptr ) != slen || std::strlen( ptr ) != slen )
-                {
-                    std::cerr << "insertion error: " << slen << "\n";
-                }
+                icp::IString str( pi1.data() + distrib(gen), true );
             }
         } );
     }
@@ -49,11 +58,30 @@ int main( int, char** )
     }
 
     icp::IString b3( "blabla", true );
+    CHECK( b3=blabla, b3 == "blabla", == true )
+    CHECK( b2-b1, b2.data() - b1.data(), > 0 )
+    CHECK( b3-b1, b3.data() - b1.data(), == 0 )
+
     icp::IString pi2( pi999 );
     icp::IString anything( "dadadadada" );
     icp::IString pi3( pi999, true );
-    std::cout << "b2-b1=" << ( b2.data() - b1.data() ) << std::endl;
-    std::cout << "b3-b1=" << ( b3.data() - b1.data() ) << std::endl;
-    std::cout << "pi11-pi1=" << ( pi11.data() - pi1.data() ) << std::endl;
-    std::cout << "pi3-pi2=" << ( pi3.data() - pi2.data() ) << std::endl;
+    CHECK( pi11-pi1, pi11.data() - pi1.data(), != 0  )
+    CHECK( pi3-pi2, pi3.data() - pi2.data(), == 0 )
+
+    std::set<icp::IString> sset;
+    sset.emplace( "123" );
+    sset.emplace( "123", true );
+    sset.emplace( "123" );
+    CHECK( set.size, sset.size(), == 1 )
+    sset.emplace( "234" );
+    CHECK( set.size, sset.size(), == 2 )
+
+    bool found = sset.find( icp::IStrView( "123" ) ) != sset.end();
+    CHECK( found, found, == true )
+
+    found = sset.find( "012"_isv) != sset.end();
+    CHECK( found, found, == false )
+
+    found = sset.find( (icp::IStrView)std::string( "012" ) ) != sset.end();
+    CHECK( found, found, == false )
 }

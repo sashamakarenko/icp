@@ -9,6 +9,15 @@
 namespace icp
 {
 
+bool debug = false;
+
+bool IString::setDebug( bool on )
+{
+    bool prev = debug;
+    debug = on;
+    return prev;
+}
+
 namespace
 {
     constexpr static ptr_type MAX_POOLS_BITS = 10;
@@ -30,28 +39,13 @@ struct IStringPool
 
     std::atomic< ptr_type > head;
     std::vector< char >     data;
-
-    static std::atomic< unsigned > poolHead;
-    static IStringPool             pools[ MAX_POOLS ];
-        
 };
 
 
 void IStringPool::init( ptr_type size )
 {
     data.assign( size, 0 );
-    head = 2;
-    std::lock_guard<std::mutex> guard( logMtx );
-    std::cout << "IStringPool.size = " << data.size() << std::endl;
-}
-
-IStringPool::~IStringPool()
-{
-    if( ! data.empty() )
-    {
-        std::lock_guard<std::mutex> guard( logMtx );
-        std::cout << "IStringPool.head = " << head.load() << std::endl;
-    }
+    head = 4;
 }
 
 
@@ -63,7 +57,20 @@ std::atomic<unsigned> poolHead( initPool0() );
 unsigned initPool0()
 {
     pools[0].init( DATA_SIZE );
+    if( debug )
+    {
+        std::cout << "IStringPool.size = " << DATA_SIZE << std::endl;
+    }
     return 0;
+}
+
+IStringPool::~IStringPool()
+{
+    if( ( ! data.empty() ) && debug )
+    {
+        std::lock_guard<std::mutex> guard( logMtx );
+        std::cout << "IStringPool[" << ( this - & pools[0] ) << "].head = " << head.load() << std::endl;
+    }
 }
 
 inline constexpr IString::len_type decodeLength( const char * ptr )
@@ -75,20 +82,28 @@ void printCorruptedBuffer( unsigned pool, ptr_type idx, const char * ptr )
 {
     const char * zero = ptr - 1;
     while( *zero ) --zero;
-    std::cerr << "corrupted data pool: " << pool << " idx: " << idx << " len: " << (ptr-zero) << " bytes: " << (int)ptr[-1] << ' ' << (int)ptr[0] << ' ' << (int)ptr[1] << ' ' << (int)ptr[2] << ' ' << (int)ptr[3] << std::endl;
+    std::cerr << "corrupted data pool: " << pool << " idx: " << idx << " len: " << (ptr-zero) 
+              << " bytes: " << (uint8_t)ptr[-1] << ' ' 
+                            << (uint8_t)ptr[0] << ' ' 
+                            << (uint8_t)ptr[1] << ' ' 
+                            << (uint8_t)ptr[2] << ' '
+                            << (uint8_t)ptr[3] << std::endl;
 }
 
 }
+
+bool IString::reuseAllStrings = false;
 
 /*
 pool data layout
 
   0   1   2   3   4   5   6   7   8   9  10  11  12  13  14
 |___|___|___|___|___|___|___|___|___|___|___|___|___|___|...
-  0   0   3   A   B   C   0   1   2   V   E   R   Y  ... 
-  |   |                       |
-  |   string ABC idx          130 byte long string idx
-  reserved for 0 length strings
+  0   0   0   0   3   A   B   C   0   1   2   V   E   R   Y  ... 
+  |   |       |                       |
+  |   |       string ABC idx          130 byte long string idx
+  |   reserved for 0 length strings
+  reserved for nullptr
 */
 
 IString IString::searchExisting( const char * str, len_type len )
@@ -98,17 +113,16 @@ IString IString::searchExisting( const char * str, len_type len )
     {
         auto & pool = pools[ ph ];
         ptr_type endOfData = pool.head.load();
-        for( ptr_type idx = 1; idx < endOfData; )
+        for( ptr_type idx = 3; idx < endOfData; )
         {
             const char * ptr = & pool.data[ idx ];
             len_type l = decodeLength( ptr );
             if( l == 0 )
             {
                 // last in pool
-                if( idx + std::numeric_limits<len_type>::max() < DATA_SIZE )
+                if( idx + std::numeric_limits<len_type>::max() < endOfData )
                 {
                     printCorruptedBuffer( ph, idx, ptr );
-                    break;
                 }
                 break;
             }
@@ -120,10 +134,9 @@ IString IString::searchExisting( const char * str, len_type len )
                 if( l == 0 )
                 {
                     // last in pool
-                    if( idx + std::numeric_limits<len_type>::max() < DATA_SIZE )
+                    if( idx + std::numeric_limits<len_type>::max() < endOfData )
                     {
                         printCorruptedBuffer( ph, idx, ptr );
-                        break;
                     }
                     break;
                 }
@@ -131,7 +144,6 @@ IString IString::searchExisting( const char * str, len_type len )
                 {
                     // todo
                     printCorruptedBuffer( ph, idx, ptr );
-                    break;
                 }
             }
             if( l == len && std::strncmp( ptr + 2, str, l ) == 0 )
@@ -146,16 +158,18 @@ IString IString::searchExisting( const char * str, len_type len )
 }
 
 
-bool IString::assign( const char * str, IString::len_type len, bool reuse )
+void IString::assign( const char * str, IString::len_type len, bool reuse )
 {
-    if( _idx != 0 )
+    if( str == nullptr )
     {
-        return false;
+        _idx = 0;
+        return;
     }
-    
-    if( str == nullptr || len == 0 )
+
+    if( len == 0 )
     {
-        return true;
+        _idx = 1;
+        return;
     }
     
     if( len == npos )
@@ -168,13 +182,19 @@ bool IString::assign( const char * str, IString::len_type len, bool reuse )
         len = (len_type)sz;
     }
     
+    if( len == 0 )
+    {
+        _idx = 1;
+        return;
+    }
+
     if( reuse )
     {
         IString existing = searchExisting( str, len );
         if( existing._idx )
         {
             _idx = existing._idx;
-            return true;
+            return;
         }
     }
 
@@ -239,7 +259,6 @@ bool IString::assign( const char * str, IString::len_type len, bool reuse )
     }
 
     _idx = ( ph << DATA_SIZE_BITS ) + idx;
-    return true;
 }
 
 IString::IString( const char * str, IString::len_type len, bool reuse ) : _idx{0}
@@ -263,16 +282,34 @@ IString::len_type IString::size() const noexcept
     return decodeLength( ptr );
 }
 
+int IString::compare( const IString & other ) const
+{
+    const char * myPtr  = _idx == TMP ? static_cast<const IStrView*>(this)->getPtr() : c_str();
+    const char * othPtr = other._idx == TMP ? static_cast<const IStrView&>(other).getPtr() : other.c_str();
+
+    if( myPtr == othPtr )
+    {
+        return 0;
+    }
+    return strcmp( myPtr, othPtr );
+}
+
 bool IString::operator == ( const IString & other ) const
 {
     if( _idx == other._idx )
     {
         return true;
     }
-    return strcmp( c_str(), other.c_str() ) < 0;
+    return strcmp( c_str(), other.c_str() ) == 0;
+}
+
+bool IString::operator == ( const char * str ) const
+{
+    return strcmp( c_str(), str ) == 0;
 }
 
 }
+
 
 std::ostream & operator << ( std::ostream & os, const icp::IString & str )
 {

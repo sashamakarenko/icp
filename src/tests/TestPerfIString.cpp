@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstring>
 #include <icp/IString.h>
 #include <pe/Measurement.h>
 
@@ -19,10 +20,12 @@ int main( int, char** )
     m.addEvent( pe::EventType::memory );
     m.initialize( 30 );
     
+    auto len = std::strlen( longString );
+
     for( int j = 0; j < m.getMaxCaptures(); ++j )
     {
         m.startCapture();
-        icp::IString c( longString );
+        icp::IString c( longString, len );
         m.stopCapture();
     }
     m.prepareResults();
@@ -33,7 +36,7 @@ int main( int, char** )
     for( int j = 0; j < m.getMaxCaptures(); ++j )
     {
         m.startCapture();
-        std::string c( longString );
+        std::string c( longString, len );
         m.stopCapture();
     }
     m.prepareResults();

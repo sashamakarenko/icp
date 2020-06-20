@@ -19,3 +19,4 @@ template<> constexpr icp::ptr_type OrderPtr::NoPoolsBits(){ return 12; };
 template class icp::IPtr<Order>;
 template class icp::IPtrPool<Order>;
 
+double totalPrice;

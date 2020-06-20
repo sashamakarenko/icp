@@ -11,6 +11,8 @@ TEST_EXTRA_DEPENDENCY := $(PE_LIB_PATH)
 TEST_EXTRA_LINK_LIBS = -L$(dir $(PE_LIB_PATH)) -l$(patsubst lib%.so,%,$(notdir $(PE_LIB_PATH))) -lpthread
 TEST_EXTRA_LD_PATH :=$(dir $(PE_LIB_PATH))
 
+LINK_EXTRA_LIBS = -flto
+
 include mfile/Makefile
 
 $(PE_LIB_PATH):
