@@ -1,12 +1,35 @@
 # icp - Immutable Compact Pointers
-Using 64-bit pointers and modern std::string makes your objects quite large and increases cache misse probability.
+Using 64-bit pointers and modern std::string makes your objects quite large and may increases cache misse probability.
 
-For example a structure like this
+Suppose you run a webstore and maintain an inmemory databae:
 ```
-struct Instrument
-{
-    std::string id;
-    Book * book;
-};
+                                   +--------------------+
+   +-----------------+  1          |       Customer     |
+   |      Order      o------------>|--------------------+
+   |-----------------|             | firstName: string  |
+   | id: string      |<------------o secondName: string |
+   | state: State    |          *  | email: string      |
+   +--------o--------+             +--------------------+
+            | *
+            |
+            |
+            v                     +-----------------------+
+ +--------------------+           |        Product        |
+ |        Item        |    1      |-----------------------|
+ |--------------------o---------->|  id: string           |
+ | quantity: unsigned |           |  name: string         |
+ +--------------------+           |  description: string  |
+                                  |  price: double        |
+                                  +-----------------------+
 ```
 
+Below are correponding object sizes in bytes:
+
+```
+Class       ICP  Conventional
+--------   ----  ----
+Customer     40   152
+Product      24   112
+Item          8    24
+Order        40    80
+```
