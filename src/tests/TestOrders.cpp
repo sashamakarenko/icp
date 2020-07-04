@@ -44,7 +44,7 @@ int main( int, char** )
     // icp::IString::setDebug( true );
     CustomerPtr c1( "#customer1", "Bernard"_ristr, std::string( "Dupont" ), "b.dupont@gmail.com"_istr );
     CustomerPtr c2;
-    c2.make();
+    c2.construct();
     c2->displayName = "#customer2";
     std::cout << "c2-c1 = " << ( c2.get() - c1.get() ) << std::endl;
     ProductPtr gxy9( "SGXY09", "Samsung Galaxy S9",  "Old phone...", 800 );

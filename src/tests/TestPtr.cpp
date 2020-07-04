@@ -1,5 +1,5 @@
 #include <iostream>
-#include "IPtrExt.h"
+#include "PtrExt.h"
 
 int main( int, char** )
 {

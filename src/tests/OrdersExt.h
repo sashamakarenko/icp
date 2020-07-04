@@ -1,7 +1,7 @@
 #ifndef ORDERS_EXT_H
 #define ORDERS_EXT_H
 
-#include <icp/IPtr.h>
+#include <icp/Ptr.h>
 #include <icp/IString.h>
 #include <iostream>
 #include <vector>
@@ -9,7 +9,7 @@
 
 struct Order;
 
-typedef icp::IPtr<Order> OrderPtr;
+typedef icp::Ptr<Order> OrderPtr;
 
 struct Customer
 {
@@ -31,7 +31,7 @@ struct Customer
     std::vector<OrderPtr> ordersHistory;
 };
 
-typedef icp::IPtr<Customer> CustomerPtr;
+typedef icp::Ptr<Customer> CustomerPtr;
 
 struct Product
 {
@@ -52,7 +52,7 @@ struct Product
     double               price;
 };
 
-typedef icp::IPtr<Product> ProductPtr;
+typedef icp::Ptr<Product> ProductPtr;
 
 struct Item
 {
@@ -63,7 +63,7 @@ struct Item
     uint16_t             quantity;
 };
 
-typedef icp::IPtr<Item> ItemPtr;
+typedef icp::Ptr<Item> ItemPtr;
 
 
 struct Order

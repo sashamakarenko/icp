@@ -1,7 +1,7 @@
-#ifndef IPTREXT_H
-#define IPTREXT_H
+#ifndef PTREXT_H
+#define PTREXT_H
 
-#include <icp/IPtr.h>
+#include <icp/Ptr.h>
 #include <icp/IString.h>
 #include <iostream>
 #include <vector>
@@ -13,6 +13,6 @@ struct S
     int i;
 };
 
-typedef icp::IPtr<S> SPtr;
+typedef icp::Ptr<S> SPtr;
 
-#endif /* IPTREXT_H */
+#endif /* PTREXT_H */
