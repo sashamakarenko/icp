@@ -13,7 +13,7 @@ namespace icp
 
 typedef uint32_t ptr_type;
 
-// Immutable Pointer
+// Compact Pointer
 template< typename T >
 class Ptr
 {
