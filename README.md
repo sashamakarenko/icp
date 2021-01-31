@@ -1,5 +1,5 @@
 # icp - Immutable and Compact Pointers
-Using 64-bit pointers and modern std::string makes your objects quite large and may increase cache misse probability.
+Using 64-bit pointers and modern std::string makes your objects quite large and may increase cache miss probability.
 
 Suppose you run a webstore and maintain an in-memory database:
 ```
