@@ -51,19 +51,19 @@ int main( int, char** )
         std::string_view view{ ptr };
         if( cache.find( view ) == cache.end() )
         {
-            icp::IString str( ptr, true );
+            icp::IString str( ptr );
             cache[ str ] = str;
         }
     }
 
-    for( int j = 0; j < 1000; ++j )
+    for( int j = 0; j < 100; ++j )
     {
         const char * ptr = pi.data() + distrib(gen);
         m.startCapture();
         std::string_view view{ ptr };
         if( cache.find( view ) == cache.end() )
         {
-            icp::IString str( ptr, true );
+            icp::IString str( ptr );
             cache[ str ] = str;
         }
         m.stopCapture();
@@ -88,7 +88,7 @@ int main( int, char** )
         }
     }
 
-    for( int j = 0; j < 1000; ++j )
+    for( int j = 0; j < 100; ++j )
     {
         const char * ptr = pi.data() + distrib(gen);
         m.startCapture();

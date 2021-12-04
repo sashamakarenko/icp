@@ -1,19 +1,12 @@
-#include <iostream>
 #include <thread>
 #include <vector>
 #include <set>
 #include <random>
 #include <cstring>
-#include <iomanip>
 #include <icp/IString.h>
+#include "Helper.h"
 
 extern const char * longString, *pi1000, *pi999;
-
-#define CHECK( TITLE, EXPR, CONDITION ) {\
-    auto res = EXPR;\
-    const char * bg = ( res CONDITION ) ? "\e[32;1m" : "\e[31;1m";\
-    std::cout << #TITLE << " : " << bg << std::boolalpha << res << "\e[0m" << std::endl;\
-}
 
 bool dbg = icp::IString::setDebug( true );
 

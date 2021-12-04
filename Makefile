@@ -13,7 +13,11 @@ TEST_EXTRA_LD_PATH :=$(dir $(PE_LIB_PATH))
 
 LINK_EXTRA_LIBS = -flto
 
-include mfile/Makefile
+-include ../makefile/Makefile
+
+../makefile/Makefile:
+	@echo "cloning makefile..."
+	@cd ..; git clone https://github.com/sashamakarenko/makefile.git makefile
 
 $(PE_LIB_PATH):
 	$(SUBMAKE) -C $(PE_ROOT)

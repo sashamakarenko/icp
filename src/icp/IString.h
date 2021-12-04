@@ -3,7 +3,7 @@
 #ifndef PROTECT_ISTRING_H
 #define PROTECT_ISTRING_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <cstring>
 #include <string_view>
@@ -38,6 +38,7 @@ class IString
         const char * c_str() const noexcept { return ptr(); }
         const char * data() const noexcept { return ptr(); }
         const std::string_view toStringView() const noexcept { return { c_str(), size() }; }
+        operator std::string_view() const noexcept { return { c_str(), size() }; }
         std::string toString() const noexcept { return { c_str(), size() }; }
 
         len_type size() const noexcept;
