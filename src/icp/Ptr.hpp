@@ -25,7 +25,7 @@ std::string typeName()
 template< typename T >
 typename Ptr<T>::Pool Ptr<T>::Pool::pools[ MAX_POOLS ]={};
 
-template< typename T >
+template< typename T >   
 std::atomic<unsigned> Ptr<T>::Pool::poolHead( initPool0() );
 
 template< typename T >
