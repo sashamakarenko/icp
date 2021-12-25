@@ -43,11 +43,37 @@ icp::IString username("John");
 ```
 
 then use it as a regular std::string.
+### Caching
+
+```c++
+std::unordered_map< std::string_view, icp::IString > allUserNames;
+...
+
+// name comes from a network message for example
+User::Ptr createUser( const char * name, size_t nameLength )
+{
+    // tip: lock allUserNames here if necessary
+    std::string_view view{ name, nameLength };
+    auto nameIt = allUserNames.find( view );
+    if( it == allUserNames.end() )
+    {
+        // construct it really
+        icp::IString newName( name, nameLength );
+
+        // important to use newName as key and value
+        nameIt = allUserNames.insert( newName, newName ).first;
+    }
+    return User::newInstance( nameIt->second );
+}
+
+```
+
 
 # Pointers API
 
+### MyClass.h
+
 ```c++
-// MyClass.h
 #include <icp/IPtr.h>
 ...
 class MyClass
@@ -59,8 +85,8 @@ class MyClass
 typedef icp::Ptr<MyClass> MyClassPtr;
 ```
 
+### MyClass.cpp
 ```c++
-// MyClass.cpp
 #include "<MyClass.h"
 
 // required to instantiate template
