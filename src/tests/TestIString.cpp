@@ -69,12 +69,12 @@ int main( int, char** )
     sset.emplace( "234" );
     CHECK( set.size, sset.size(), == 2 )
 
-    bool found = sset.find( icp::IStrView( "123" ) ) != sset.end();
+    bool found = sset.find( icp::IStrFake( "123" ) ) != sset.end();
     CHECK( found, found, == true )
 
-    found = sset.find( "012"_isv) != sset.end();
+    found = sset.find( "012"_isf) != sset.end();
     CHECK( found, found, == false )
 
-    found = sset.find( (icp::IStrView)std::string( "012" ) ) != sset.end();
+    found = sset.find( (icp::IStrFake)std::string( "012" ) ) != sset.end();
     CHECK( found, found, == false )
 }

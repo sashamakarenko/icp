@@ -284,8 +284,8 @@ IString::len_type IString::size() const noexcept
 
 int IString::compare( const IString & other ) const
 {
-    const char * myPtr  = _idx == TMP ? static_cast<const IStrView*>(this)->getPtr() : c_str();
-    const char * othPtr = other._idx == TMP ? static_cast<const IStrView&>(other).getPtr() : other.c_str();
+    const char * myPtr  = _idx == TMP ? static_cast<const IStrFake*>(this)->getPtr() : c_str();
+    const char * othPtr = other._idx == TMP ? static_cast<const IStrFake&>(other).getPtr() : other.c_str();
 
     if( myPtr == othPtr )
     {

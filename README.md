@@ -23,7 +23,7 @@ Suppose you run a webstore and maintain an in-memory database:
                                   +-----------------------+
 ```
 
-Below are correponding object sizes in bytes:
+Below are corresponding object sizes in bytes:
 
 ```
 Class       ICP  Conventional

@@ -14,7 +14,7 @@ namespace icp
 
 typedef uint32_t ptr_type;
 
-class IStrView;
+class IStrFake;
 // Immutable String.
 class IString
 {
@@ -31,7 +31,7 @@ class IString
         explicit IString( const char * str, bool reuse = reuseAllStrings ): IString( str, npos, reuse ) {};
         explicit IString( const std::string & str, bool reuse = reuseAllStrings ): IString( str.c_str(), str.size(), reuse ) {}
         explicit IString( const std::string_view & str, bool reuse = reuseAllStrings ): IString( str.data(), str.size(), reuse ) {}
-        explicit IString( const IStrView & view );
+        explicit IString( const IStrFake & view );
 
         ~IString() noexcept { /* _idx = 0; */ }
     
@@ -78,12 +78,12 @@ class IString
         ptr_type _idx;
 };
 
-class IStrView: public IString
+class IStrFake: public IString
 {
     public:
         
-        explicit IStrView( const char * ptr ): IString( tmp_trait{} ), _ptr(ptr) {}
-        explicit IStrView( const std::string & str ): IString( tmp_trait{} ), _ptr( str.c_str() ) {}
+        explicit IStrFake( const char * ptr ): IString( tmp_trait{} ), _ptr(ptr) {}
+        explicit IStrFake( const std::string & str ): IString( tmp_trait{} ), _ptr( str.c_str() ) {}
     
         const char * getPtr() const { return _ptr; }
 
@@ -92,13 +92,13 @@ class IStrView: public IString
         const char * const _ptr;
 };
 
-inline IString::IString( const IStrView & view ): IString( view.getPtr() )
+inline IString::IString( const IStrFake & view ): IString( view.getPtr() )
 {
 }
 
 }
 
-inline icp::IStrView operator "" _isv( const char * ptr, long unsigned ){ return icp::IStrView( ptr ); }
+inline icp::IStrFake operator "" _isf( const char * ptr, long unsigned ){ return icp::IStrFake( ptr ); }
 inline icp::IString  operator "" _istr( const char * ptr, long unsigned ){ return icp::IString( ptr ); }
 inline icp::IString  operator "" _ristr( const char * ptr, long unsigned ){ return icp::IString( ptr, true ); }
 
