@@ -77,4 +77,8 @@ int main( int, char** )
 
     found = sset.find( (icp::IStrFake)std::string( "012" ) ) != sset.end();
     CHECK( found, found, == false )
+
+    icp::IStrView pi2view( pi2 );
+    CHECK( pi2view.size, pi2view.size(), == pi2.size() )
+    CHECK( pi2view.ptr, pi2view.c_str(), == pi2.c_str() )
 }

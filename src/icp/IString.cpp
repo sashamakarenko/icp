@@ -73,11 +73,6 @@ IStringPool::~IStringPool()
     }
 }
 
-inline constexpr IString::len_type decodeLength( const char * ptr )
-{
-    return ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] );
-}
-
 void printCorruptedBuffer( unsigned pool, ptr_type idx, const char * ptr )
 {
     const char * zero = ptr - 1;
@@ -307,17 +302,6 @@ bool IString::operator == ( const char * str ) const
 {
     return strcmp( c_str(), str ) == 0;
 }
-
-IString::len_type IStrView::size() const noexcept
-{
-    if( _ptr == 0 )
-    {
-        return 0;
-    }
-    
-    return decodeLength( _ptr - 2 );
-}
-
 
 }
 

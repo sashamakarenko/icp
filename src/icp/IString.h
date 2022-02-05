@@ -61,6 +61,8 @@ class IString
 
         static bool getReuseAllString(){ return reuseAllStrings; }
 
+        static len_type decodeLength( const char * ptr ) { return ( ((uint16_t)(uint8_t)ptr[0]) << 8 ) | ( (uint16_t)(uint8_t)ptr[1] ); }
+
     protected:
 
         constexpr static ptr_type TMP = ptr_type(0) - 1;
@@ -107,7 +109,7 @@ class IStrView
         operator std::string_view() const noexcept { return { c_str(), size() }; }
         std::string toString() const noexcept { return { c_str(), size() }; }
 
-        IString::len_type size() const noexcept;
+        IString::len_type size() const noexcept { return _ptr == nullptr ? 0 : IString::decodeLength( _ptr - 2 ); }
 
     private:
 
