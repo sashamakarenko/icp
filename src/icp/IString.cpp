@@ -308,6 +308,17 @@ bool IString::operator == ( const char * str ) const
     return strcmp( c_str(), str ) == 0;
 }
 
+IString::len_type IStrView::size() const noexcept
+{
+    if( _ptr == 0 )
+    {
+        return 0;
+    }
+    
+    return decodeLength( _ptr - 2 );
+}
+
+
 }
 
 

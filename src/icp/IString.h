@@ -96,6 +96,25 @@ inline IString::IString( const IStrFake & view ): IString( view.getPtr() )
 {
 }
 
+class IStrView
+{
+    public:
+        
+        explicit IStrView( const IString & str ): _ptr( str.c_str() ) {}
+    
+        const char * c_str() const noexcept { return _ptr; }
+        const char * data() const noexcept { return _ptr; }
+        operator std::string_view() const noexcept { return { c_str(), size() }; }
+        std::string toString() const noexcept { return { c_str(), size() }; }
+
+        IString::len_type size() const noexcept;
+
+    private:
+
+        const char * const _ptr;
+};
+
+
 }
 
 inline icp::IStrFake operator "" _isf( const char * ptr, long unsigned ){ return icp::IStrFake( ptr ); }
