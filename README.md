@@ -43,7 +43,7 @@ icp::IString username("John");
 ```
 
 then use it as a regular std::string.
-### Caching
+## Caching
 
 ```c++
 std::unordered_map< std::string_view, icp::IString > allUserNames;
@@ -68,6 +68,9 @@ User::Ptr createUser( const char * name, size_t nameLength )
 
 ```
 
+## IStrFake class and zero copy use cases
+
+## IStrView faster access wrapper
 
 # Pointers API
 

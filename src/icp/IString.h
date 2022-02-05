@@ -129,9 +129,16 @@ namespace std
     {
         return istr.toString();
     }
+
+    inline std::string to_string( const icp::IStrView & istr ) noexcept 
+    {
+        return istr.toString();
+    }
 }
 
 
 std::ostream & operator << ( std::ostream & os, const icp::IString & str );
+
+std::ostream & operator << ( std::ostream & os, const icp::IStrView & str );
 
 #endif

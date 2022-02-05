@@ -305,8 +305,12 @@ bool IString::operator == ( const char * str ) const
 
 }
 
-
 std::ostream & operator << ( std::ostream & os, const icp::IString & str )
+{
+    return os << str.c_str();
+}
+
+std::ostream & operator << ( std::ostream & os, const icp::IStrView & str )
 {
     return os << str.c_str();
 }
