@@ -105,3 +105,6 @@ template class icp::Ptr<MyClass>;
 ```
 
 See example in src/test/TestOrders.cpp
+
+[![HitCount](https://hits.dwyl.com/sashamakarenko/icp.svg?style=flat)](http://hits.dwyl.com/sashamakarenko/icp)
+
