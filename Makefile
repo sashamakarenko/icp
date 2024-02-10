@@ -11,6 +11,7 @@ ifneq ($(wildcard $(PE_PRJ_DIR)),)
     TestPerfIString_EXTRA_LD_PATH    := $(PE_PRJ_DIR)/build/lib/release
     TestPerfIString_EXTRA_LINK_FLAGS := -L$(TestPerfIString_EXTRA_LD_PATH) -lpe-1.0
     TestPerfIString_EXTRA_DEPENDENCY := $(PE_PRJ_DIR)/build/lib/release/libpe-1.0.so
+    TestPerfIString_EXTRA_LAUNCHER   := LD_PRELOAD=$(PE_PRJ_DIR)/build/lib/release/libPePreload-1.0.so
     TestIStringMap_EXTRA_CPP_FLAGS   := $(TestPerfIString_EXTRA_CPP_FLAGS)
     TestIStringMap_EXTRA_LD_PATH     := $(TestPerfIString_EXTRA_LD_PATH)
     TestIStringMap_EXTRA_LINK_FLAGS  := $(TestPerfIString_EXTRA_LINK_FLAGS)
